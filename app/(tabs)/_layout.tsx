@@ -1,35 +1,98 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import { useTheme } from '../_layout';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+function TabIcon({ color, focused, children }: { color: string; focused: boolean; children: string }) {
+  return (
+    <View style={[styles.iconContainer, focused && styles.iconFocused]}>
+      <View>
+        {/* icon placeholder */}
+      </View>
+    </View>
+  );
+}
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { isDark } = useTheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+        tabBarStyle: {
+          backgroundColor: isDark ? '#0F172A' : '#FFFFFF',
+          borderTopColor: isDark ? '#1E293B' : '#E2E8F0',
+          borderTopWidth: 1,
+          paddingBottom: 8,
+          paddingTop: 8,
+          height: 64,
+        },
+        tabBarActiveTintColor: '#10B981',
+        tabBarInactiveTintColor: isDark ? '#475569' : '#94A3B8',
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Today',
+          tabBarIcon: ({ color }) => (
+            <TabIcon color={color} focused={false}>🏠</TabIcon>
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="habits"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Habits',
+          tabBarIcon: ({ color }) => (
+            <TabIcon color={color} focused={false}>✓</TabIcon>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="insights"
+        options={{
+          title: 'Insights',
+          tabBarIcon: ({ color }) => (
+            <TabIcon color={color} focused={false}>📊</TabIcon>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="targets"
+        options={{
+          title: 'Targets',
+          tabBarIcon: ({ color }) => (
+            <TabIcon color={color} focused={false}>🎯</TabIcon>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => (
+            <TabIcon color={color} focused={false}>👤</TabIcon>
+          ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  iconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+  },
+  iconFocused: {
+    backgroundColor: '#D1FAE5',
+  },
+});
