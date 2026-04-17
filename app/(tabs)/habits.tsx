@@ -1,8 +1,8 @@
 import { db } from '@/db/client';
 import { categories, habits } from '@/db/schema';
 import { and, eq } from 'drizzle-orm';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -71,9 +71,11 @@ export default function HabitsScreen() {
     }
   };
 
-  useEffect(() => {
+useFocusEffect(
+  useCallback(() => {
     loadHabits();
-  }, [user]);
+  }, [user])
+);
 
   const deleteHabit = async (id: number) => {
     await db
