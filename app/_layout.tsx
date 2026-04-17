@@ -110,10 +110,11 @@ export default function RootLayout() {
       <AuthContext.Provider value={{ user, login, register, logout, deleteProfile }}>
         <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
           <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
+            <Stack.Screen name="(tabs)" />
             <Stack.Screen name="login" />
             <Stack.Screen name="register" />
-            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="add-habit" />
+            <Stack.Screen name="edit-habit" />
           </Stack>
         </ThemeProvider>
       </AuthContext.Provider>
