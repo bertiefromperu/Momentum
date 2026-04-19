@@ -9,6 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,16 +23,27 @@ type Habit = {
   unit: string | null;
   targetValue: number | null;
   frequency: string;
+  categoryId: number;
   categoryName: string;
   categoryColour: string;
   categoryIcon: string;
+};
+
+type Category = {
+  id: number;
+  name: string;
+  colour: string;
+  icon: string;
 };
 
 export default function HabitsScreen() {
   const { user } = useAuth();
   const router = useRouter();
   const [habitList, setHabitList] = useState<Habit[]>([]);
+  const [categoryList, setCategoryList] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
 
   const loadHabits = async () => {
     if (!user) return;
@@ -47,6 +59,8 @@ export default function HabitsScreen() {
         .from(categories)
         .where(eq(categories.userId, user.id));
 
+      setCategoryList(allCategories);
+
       const combined: Habit[] = allHabits.map(habit => {
         const category = allCategories.find(c => c.id === habit.categoryId);
         return {
@@ -57,6 +71,7 @@ export default function HabitsScreen() {
           unit: habit.unit,
           targetValue: habit.targetValue,
           frequency: habit.frequency,
+          categoryId: habit.categoryId,
           categoryName: category?.name ?? 'Uncategorised',
           categoryColour: category?.colour ?? '#94A3B8',
           categoryIcon: category?.icon ?? '📌',
@@ -71,11 +86,11 @@ export default function HabitsScreen() {
     }
   };
 
-useFocusEffect(
-  useCallback(() => {
-    loadHabits();
-  }, [user])
-);
+  useFocusEffect(
+    useCallback(() => {
+      loadHabits();
+    }, [user])
+  );
 
   const deleteHabit = async (id: number) => {
     await db
@@ -84,6 +99,18 @@ useFocusEffect(
       .where(eq(habits.id, id));
     loadHabits();
   };
+
+  const filteredHabits = habitList.filter(habit => {
+    const matchesSearch =
+      searchQuery.trim() === '' ||
+      habit.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (habit.description ?? '').toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesCategory =
+      selectedCategory === null || habit.categoryId === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
 
   if (loading) {
     return (
@@ -108,13 +135,80 @@ useFocusEffect(
           </Pressable>
         </View>
 
-        {habitList.length === 0 ? (
+        {/* Search */}
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search habits..."
+          placeholderTextColor="#475569"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          accessibilityLabel="Search habits by name or description"
+        />
+
+        {/* Category Filter */}
+        {categoryList.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.filterScroll}
+            contentContainerStyle={styles.filterContent}
+          >
+            <Pressable
+              style={[styles.filterChip, selectedCategory === null && styles.filterChipActive]}
+              onPress={() => setSelectedCategory(null)}
+              accessibilityLabel="Show all categories"
+              accessibilityRole="button"
+            >
+              <Text style={[styles.filterChipText, selectedCategory === null && styles.filterChipTextActive]}>
+                All
+              </Text>
+            </Pressable>
+            {categoryList.map(cat => (
+              <Pressable
+                key={cat.id}
+                style={[
+                  styles.filterChip,
+                  { borderColor: cat.colour },
+                  selectedCategory === cat.id && { backgroundColor: cat.colour + '33' },
+                ]}
+                onPress={() => setSelectedCategory(
+                  selectedCategory === cat.id ? null : cat.id
+                )}
+                accessibilityLabel={`Filter by ${cat.name} category`}
+                accessibilityRole="button"
+              >
+                <Text style={[
+                  styles.filterChipText,
+                  { color: selectedCategory === cat.id ? cat.colour : '#94A3B8' },
+                ]}>
+                  {cat.icon} {cat.name}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        )}
+
+        {/* Results count */}
+        {(searchQuery.trim() !== '' || selectedCategory !== null) && (
+          <Text style={styles.resultsText}>
+            {filteredHabits.length} result{filteredHabits.length !== 1 ? 's' : ''}
+          </Text>
+        )}
+
+        {/* Habit List */}
+        {filteredHabits.length === 0 ? (
           <View style={styles.empty}>
-            <Text style={styles.emptyText}>No habits yet.</Text>
-            <Text style={styles.emptySubText}>Tap + Add to create your first habit.</Text>
+            <Text style={styles.emptyText}>
+              {habitList.length === 0 ? 'No habits yet.' : 'No habits match your search.'}
+            </Text>
+            <Text style={styles.emptySubText}>
+              {habitList.length === 0
+                ? 'Tap + Add to create your first habit.'
+                : 'Try a different search or category filter.'}
+            </Text>
           </View>
         ) : (
-          habitList.map(habit => (
+          filteredHabits.map(habit => (
             <View key={habit.id} style={styles.card}>
               <View style={styles.cardTop}>
                 <View style={styles.cardLeft}>
@@ -169,14 +263,39 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#0F172A' },
   loader: { flex: 1, backgroundColor: '#0F172A', justifyContent: 'center', alignItems: 'center' },
   container: { paddingHorizontal: 20, paddingBottom: 32 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, marginBottom: 24 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, marginBottom: 16 },
   title: { fontSize: 24, fontWeight: '700', color: '#F1F5F9' },
   addButton: { backgroundColor: '#10B981', borderRadius: 10, paddingHorizontal: 16, paddingVertical: 8 },
   addButtonPressed: { opacity: 0.8 },
   addButtonText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  searchInput: {
+    backgroundColor: '#1E293B',
+    borderColor: '#334155',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 15,
+    color: '#F1F5F9',
+    marginBottom: 12,
+  },
+  filterScroll: { marginBottom: 8 },
+  filterContent: { gap: 8, paddingRight: 8 },
+  filterChip: {
+    borderRadius: 99,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderWidth: 1,
+    borderColor: '#334155',
+    backgroundColor: '#1E293B',
+  },
+  filterChipActive: { backgroundColor: '#10B98122', borderColor: '#10B981' },
+  filterChipText: { fontSize: 13, fontWeight: '600', color: '#94A3B8' },
+  filterChipTextActive: { color: '#10B981' },
+  resultsText: { fontSize: 13, color: '#475569', marginBottom: 12, marginTop: 4 },
   empty: { alignItems: 'center', marginTop: 48 },
   emptyText: { fontSize: 16, color: '#94A3B8', fontWeight: '600' },
-  emptySubText: { fontSize: 14, color: '#475569', marginTop: 8 },
+  emptySubText: { fontSize: 14, color: '#475569', marginTop: 8, textAlign: 'center' },
   card: { backgroundColor: '#1E293B', borderRadius: 14, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#334155' },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between' },
   cardLeft: { flex: 1 },
