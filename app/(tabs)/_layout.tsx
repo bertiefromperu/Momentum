@@ -1,16 +1,6 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
 import { useTheme } from '../_layout';
-
-function TabIcon({ color, focused, children }: { color: string; focused: boolean; children: string }) {
-  return (
-    <View style={[styles.iconContainer, focused && styles.iconFocused]}>
-      <View>
-        {/* icon placeholder */}
-      </View>
-    </View>
-  );
-}
 
 export default function TabLayout() {
   const { isDark } = useTheme();
@@ -39,8 +29,8 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Today',
-          tabBarIcon: ({ color }) => (
-            <TabIcon color={color} focused={false}>🏠</TabIcon>
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="today-outline" size={size} color={color} />
           ),
         }}
       />
@@ -48,8 +38,8 @@ export default function TabLayout() {
         name="habits"
         options={{
           title: 'Habits',
-          tabBarIcon: ({ color }) => (
-            <TabIcon color={color} focused={false}>✓</TabIcon>
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="checkmark-circle-outline" size={size} color={color} />
           ),
         }}
       />
@@ -57,8 +47,8 @@ export default function TabLayout() {
         name="insights"
         options={{
           title: 'Insights',
-          tabBarIcon: ({ color }) => (
-            <TabIcon color={color} focused={false}>📊</TabIcon>
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="bar-chart-outline" size={size} color={color} />
           ),
         }}
       />
@@ -66,8 +56,8 @@ export default function TabLayout() {
         name="targets"
         options={{
           title: 'Targets',
-          tabBarIcon: ({ color }) => (
-            <TabIcon color={color} focused={false}>🎯</TabIcon>
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="flag-outline" size={size} color={color} />
           ),
         }}
       />
@@ -75,24 +65,11 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => (
-            <TabIcon color={color} focused={false}>👤</TabIcon>
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-outline" size={size} color={color} />
           ),
         }}
       />
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  iconContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-  },
-  iconFocused: {
-    backgroundColor: '#D1FAE5',
-  },
-});

@@ -1,5 +1,11 @@
 import { db } from '@/db/client';
 import { categories } from '@/db/schema';
+import {
+  cancelAllNotifications,
+  requestNotificationPermissions,
+  scheduleDailyReminder,
+  scheduleWeeklyReview,
+} from '@/utils/notifications';
 import { eq } from 'drizzle-orm';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -46,6 +52,7 @@ export default function ProfileScreen() {
   const [catColour, setCatColour] = useState(PRESET_COLOURS[0]);
   const [catIcon, setCatIcon] = useState(PRESET_ICONS[0]);
   const [catError, setCatError] = useState('');
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   const loadCategories = async () => {
     if (!user) return;
@@ -146,6 +153,25 @@ export default function ProfileScreen() {
     );
   };
 
+  const handleToggleNotifications = async () => {
+  if (notificationsEnabled) {
+    await cancelAllNotifications();
+    setNotificationsEnabled(false);
+  } else {
+    const granted = await requestNotificationPermissions();
+    if (granted) {
+      await scheduleDailyReminder();
+      await scheduleWeeklyReview();
+      setNotificationsEnabled(true);
+    } else {
+      Alert.alert(
+        'Permission Required',
+        'Please enable notifications in your device settings to use this feature.'
+      );
+    }
+  }
+};
+
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: isDark ? '#0F172A' : '#F8FAFC' }]}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -174,6 +200,28 @@ export default function ProfileScreen() {
             </Pressable>
           </View>
         </View>
+
+        {/* Notifications Toggle */}
+<View style={[styles.card, { backgroundColor: isDark ? '#1E293B' : '#FFFFFF', borderColor: isDark ? '#334155' : '#E2E8F0' }]}>
+  <View style={styles.row}>
+    <View>
+      <Text style={[styles.rowLabel, { color: isDark ? '#F1F5F9' : '#0F172A' }]}>
+        🔔 Daily Reminders
+      </Text>
+      <Text style={[styles.rowSub, { color: isDark ? '#475569' : '#94A3B8' }]}>
+        8pm daily + Saturday review
+      </Text>
+    </View>
+    <Pressable
+      style={[styles.toggle, { backgroundColor: notificationsEnabled ? '#10B981' : '#CBD5E1' }]}
+      onPress={handleToggleNotifications}
+      accessibilityLabel="Toggle daily reminders"
+      accessibilityRole="switch"
+    >
+      <View style={[styles.toggleThumb, { transform: [{ translateX: notificationsEnabled ? 20 : 2 }] }]} />
+    </Pressable>
+  </View>
+</View>
 
         {/* Categories */}
         <View style={styles.sectionHeader}>
@@ -352,4 +400,5 @@ const styles = StyleSheet.create({
   logoutText: { color: '#F1F5F9', fontWeight: '600', fontSize: 15 },
   deleteBtn: { backgroundColor: '#3B1F1F', borderRadius: 12, paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: '#7F1D1D' },
   deleteText: { color: '#F87171', fontWeight: '600', fontSize: 15 },
+  rowSub: { fontSize: 12, marginTop: 2 },
 });
