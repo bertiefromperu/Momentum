@@ -11,7 +11,8 @@
     "lint": "expo lint",
     "generate": "drizzle-kit generate",
     "push": "drizzle-kit push",
-    "studio": "drizzle-kit studio"
+    "studio": "drizzle-kit studio",
+    "test": "jest"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
@@ -46,10 +47,17 @@
     "react-native-worklets": "0.5.1"
   },
   "devDependencies": {
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^13.3.3",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.1.0",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
+    "expo-modules-core": "^55.0.23",
+    "jest": "^29.7.0",
+    "jest-expo": "^55.0.16",
+    "react-test-renderer": "^19.1.0",
     "tsx": "^4.21.0",
     "typescript": "~5.9.2"
   },
