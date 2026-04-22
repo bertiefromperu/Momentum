@@ -1,15 +1,16 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  ActivityIndicator,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
 import { useAuth } from './_layout';
 
@@ -48,10 +49,15 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.logo}>Momentum</Text>
-          <Text style={styles.tagline}>Build habits. Build wealth. Build yourself.</Text>
-        </View>
+       <View style={styles.header}>
+  <Image
+    source={require('../assets/images/logo.png')}
+    style={styles.logoImage}
+    resizeMode="contain"
+  />
+  <Text style={styles.logo}>Momentum</Text>
+  <Text style={styles.tagline}>Build habits. Build wealth. Build yourself.</Text>
+</View>
 
         <View style={styles.form}>
           <Text style={styles.label}>Email</Text>
@@ -179,4 +185,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
+  logoImage: {
+  width: 80,
+  height: 80,
+  marginBottom: 12,
+},
 });
